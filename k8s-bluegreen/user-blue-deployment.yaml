@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-blue
+  namespace: microservices
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: user
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: user
+        version: blue
+    spec:
+      containers:
+        - name: user
+          image: user-service:v1
+          ports:
+            - containerPort: 4082
