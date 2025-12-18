@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: auth-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4081
+          env:
+            - name: SERVER_PORT
+              value: "4081"
+            - name: SPRING_APPLICATION_NAME
+              value: auth
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+  namespace: microservices
+spec:
+  type: ClusterIP
+  selector:
+    app: auth
+  ports:
+    - port: 4081
+      targetPort: 4081

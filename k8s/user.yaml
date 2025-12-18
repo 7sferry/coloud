@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+  namespace: microservices
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+        - name: user
+          image: user-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4082
+          env:
+            - name: SERVER_PORT
+              value: "4082"
+            - name: SPRING_APPLICATION_NAME
+              value: user
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user
+  namespace: microservices
+spec:
+  type: ClusterIP
+  selector:
+    app: user
+  ports:
+    - port: 4082
+      targetPort: 4082

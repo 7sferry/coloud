@@ -45,6 +45,7 @@ public class JwtAuthFilter implements GatewayFilter{
 					.getBody();
 
 			String username = claims.getSubject();
+			System.out.println("username = " + username);
 
 			// forward username to downstream service
 			ServerHttpRequest mutated = exchange.getRequest()

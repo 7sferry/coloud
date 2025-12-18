@@ -15,35 +15,41 @@ import org.springframework.context.annotation.Primary;
 public class GatewayConfig {
 
 	@Bean
-	public RouteLocator routes(RouteLocatorBuilder builder, JwtAuthFilter jwtAuthFilter, UserKeyResolver keyResolver, IpKeyResolver ipKeyResolver,
+	public RouteLocator routes(RouteLocatorBuilder builder, JwtAuthFilter jwtAuthFilter, UserKeyResolver userKeyResolver, IpKeyResolver ipKeyResolver,
 	                           AuthRateLimiter authRateLimiter, UserRateLimiter userRateLimiter) {
 		return builder.routes()
-
+				// Auth route
 				.route("auth", r -> r
 						.path("/auth/**")
 						.filters(f -> f.requestRateLimiter(c -> {
 							c.setRateLimiter(authRateLimiter);
 							c.setKeyResolver(ipKeyResolver);
 						}))
-						.uri("http://localhost:4081"))
-				.route("users", r -> r
-						.path("/users/**")
-						.filters(f -> f.filter(jwtAuthFilter).requestRateLimiter(c -> {
-							c.setRateLimiter(userRateLimiter);
-							c.setKeyResolver(keyResolver);
-						}))
-						.uri("http://localhost:4082"))
+						.uri("http://auth:4081")
+				)
 
+				// User route with JWT filter + rate limiter
+				.route("user", r -> r
+						.path("/users/**")
+						.filters(f -> f
+								.filter(jwtAuthFilter)
+								.requestRateLimiter(c -> {
+									c.setRateLimiter(userRateLimiter);
+									c.setKeyResolver(userKeyResolver);
+								})
+						)
+						.uri("http://user:4082")
+				)
 				.build();
 	}
 
 	@Bean
-	@Primary
 	public AuthRateLimiter authRateLimiter() {
 		return new AuthRateLimiter();
 	}
 
 	@Bean
+	@Primary
 	public UserRateLimiter userRateLimiter() {
 		return new UserRateLimiter();
 	}
