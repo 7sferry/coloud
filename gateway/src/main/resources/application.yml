@@ -8,3 +8,13 @@ spring:
     name: gateway
 server:
   port: 4080
+resilience4j:
+  circuitbreaker:
+    instances:
+      userServiceCB:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3

@@ -18,22 +18,24 @@ public class GatewayConfig {
 	public RouteLocator routes(RouteLocatorBuilder builder, JwtAuthFilter jwtAuthFilter, UserKeyResolver keyResolver, IpKeyResolver ipKeyResolver,
 	                           AuthRateLimiter authRateLimiter, UserRateLimiter userRateLimiter) {
 		return builder.routes()
-
 				.route("auth", r -> r
 						.path("/auth/**")
-						.filters(f -> f.requestRateLimiter(c -> {
-							c.setRateLimiter(authRateLimiter);
-							c.setKeyResolver(ipKeyResolver);
-						}))
+						.filters(f -> f
+								.requestRateLimiter(c -> c
+										.setRateLimiter(authRateLimiter)
+										.setKeyResolver(ipKeyResolver)))
 						.uri("http://localhost:4081"))
 				.route("users", r -> r
 						.path("/users/**")
-						.filters(f -> f.filter(jwtAuthFilter).requestRateLimiter(c -> {
-							c.setRateLimiter(userRateLimiter);
-							c.setKeyResolver(keyResolver);
-						}))
+						.filters(f -> f
+								.filter(jwtAuthFilter)
+								.requestRateLimiter(c -> c
+										.setRateLimiter(userRateLimiter)
+										.setKeyResolver(keyResolver))
+								.circuitBreaker(cb -> cb
+										.setName("usersCircuitBreaker")
+										.setFallbackUri("forward:/fallback/user")))
 						.uri("http://localhost:4082"))
-
 				.build();
 	}
 
